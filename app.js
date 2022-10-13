@@ -5,6 +5,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+// import express-graphql
+const { graphqlHTTP } = require('express-graphql');
+
+// Import GraphQL schema and resolver
+const graphqlScehma = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
+
 require('dotenv').config();
 
 const app = express();
@@ -69,6 +76,15 @@ app.use((req, res, next) => {
   // Request can now continue and can be handled by our routes
   next();
 });
+
+// GraphQL configuration.
+const graphqlConfig = {
+  schema: graphqlScehma,
+  rootValue: graphqlResolver
+};
+
+// GraphQL register middleware.
+app.use('/graphql', graphqlHTTP(graphqlConfig));
 
 // Register error handling middleware
 app.use((error, req, res, next) => {
