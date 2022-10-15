@@ -3,23 +3,33 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 const createUser = async ({ userInput }, req) => {
-  // const email = args.userInput.email;
-  // const name = args.userInput.name;
-  // const password = args.userInput.password;
+  console.log({ 'resolver-create-user': userInput });
   const { email, name, password } = userInput;
 
   try {
+    //  Get user from Mongo
     const existingUser = await User.findOne({ email });
 
+    //  Check if user is exists
     if (existingUser) {
       const error = new Error('User exists already!');
       throw error;
     }
 
+    //  Hashing password
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new User({ email, name, hashedPassword });
 
+    //  Create new user with email, password, name
+    const user = new User({
+      email,
+      password: hashedPassword,
+      name
+    });
+
+    // Save user
     const createdUser = await user.save();
+
+    // Response
     return { ...createdUser._doc, _id: createdUser._id.toString() };
   } catch (error) {
     throw error;
@@ -28,25 +38,6 @@ const createUser = async ({ userInput }, req) => {
 
 const resolver = {
   createUser
-  // async createUser({ userInput }, req) {
-  //   const { email, name, password } = userInput;
-  //   try {
-  //     const existingUser = await User.findOne({ email });
-
-  //     if (existingUser) {
-  //       const error = new Error('User exists already!');
-  //       throw error;
-  //     }
-
-  //     const hashedPassword = await bcrypt.hash(password, 12);
-  //     const user = new User({ email, name, hashedPassword });
-
-  //     const createdUser = await user.save();
-  //     return { ...createdUser._doc, _id: createdUser._id.toString() };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
 };
 
 module.exports = resolver;
