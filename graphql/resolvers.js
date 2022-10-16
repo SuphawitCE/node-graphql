@@ -8,6 +8,25 @@ const createUser = async ({ userInput }, req) => {
   const { email, name, password } = userInput;
 
   try {
+    //  Validate input email
+    const errors = [];
+    if (!validator.isEmail(email)) {
+      errors.push({ message: 'E-mail is invalid.' });
+    }
+
+    // Valid input password
+    if (
+      validator.isEmpty(password) ||
+      !validator.isLength(password, { min: 5 })
+    ) {
+      errors.push({ message: 'Password must longer than 5 characters' });
+    }
+
+    if (errors.length > 0) {
+      const error = new Error('Invalid input.');
+      throw error;
+    }
+
     //  Get user from Mongo
     const existingUser = await User.findOne({ email });
 
