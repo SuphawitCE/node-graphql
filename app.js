@@ -81,7 +81,17 @@ app.use((req, res, next) => {
 const graphqlConfig = {
   schema: graphqlScehma,
   rootValue: graphqlResolver,
-  graphiql: true
+  graphiql: true,
+  // GraphQL error handle config
+  formatError(error) {
+    if (!error.originalError) {
+      return error;
+    }
+    const data = error.originalError.data;
+    const message = error.message || 'An error occured';
+    const code = error.originalError.code || 500;
+    return { message, status: code, data };
+  }
 };
 
 // GraphQL register middleware.
