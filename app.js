@@ -80,7 +80,8 @@ app.use((req, res, next) => {
 // GraphQL configuration.
 const graphqlConfig = {
   schema: graphqlScehma,
-  rootValue: graphqlResolver
+  rootValue: graphqlResolver,
+  graphiql: true
 };
 
 // GraphQL register middleware.
