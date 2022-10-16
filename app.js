@@ -84,6 +84,13 @@ const graphqlConfig = {
   graphiql: true,
   // GraphQL error handle config
   formatError(error) {
+    console.log({
+      'graphql-format-error': {
+        message: error.message,
+        originalError: error.originalError
+      }
+    });
+
     if (!error.originalError) {
       return error;
     }
