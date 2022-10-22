@@ -68,7 +68,7 @@ const login = async ({ email, password }) => {
   }
 
   // Have a user with email, check the password
-  const isEqual = await bcrypt.compare(password, user.password);
+  const isEqual = await bcrypt.compare(password, getUser.password);
 
   if (!isEqual) {
     const error = new Error('Password is incorrect');
