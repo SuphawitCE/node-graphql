@@ -73,6 +73,11 @@ app.use((req, res, next) => {
   //  Allow authorization
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+  // In the express-graphql the 'OPTIONS' request is denied except 'GET' and 'POST'
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
   // Request can now continue and can be handled by our routes
   next();
 });
@@ -83,7 +88,8 @@ const graphqlConfig = {
   rootValue: graphqlResolver,
   graphiql: true,
   // GraphQL error handle config
-  formatError(error) {
+  // formatError(error) { //  Deprecated using customFormatErrorFn instead
+  customFormatErrorFn(error) {
     console.log({
       'graphql-format-error': {
         message: error.message,
