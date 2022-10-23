@@ -93,6 +93,14 @@ const login = async ({ email, password }) => {
 
 const createPost = async ({ postInput }, req) => {
   console.log({ 'create-post-resolver': postInput });
+
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
   //  Input validation
   const errors = [];
 
@@ -113,9 +121,19 @@ const createPost = async ({ postInput }, req) => {
     }
 
     if (errors.length > 0) {
-      const error = new Error('Invalid input.');
+      const error = new Error('Invalid input');
       error.data = errors;
       error.code = 422;
+      throw error;
+    }
+
+    // Get user from DB
+    const getUser = await User.findById(req.userId);
+
+    // Check if not get a user
+    if (!getUser) {
+      const error = new Error('Invalid user');
+      error.code = 401;
       throw error;
     }
 
@@ -123,12 +141,16 @@ const createPost = async ({ postInput }, req) => {
     const postPayload = {
       title: postInput.title,
       content: postInput.content,
-      imageUrl: postInput.imageUrl
+      imageUrl: postInput.imageUrl,
+      creator: getUser
     };
     const post = new Post(postPayload);
 
     // Save post into DB
     const createdPost = await post.save();
+
+    //  Connect to add post with user
+    getUser.posts.push(createdPost);
 
     const userPostFormat = {
       ...createdPost._doc,
