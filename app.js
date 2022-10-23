@@ -11,6 +11,7 @@ const { graphqlHTTP } = require('express-graphql');
 // Import GraphQL schema and resolver
 const graphqlScehma = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
+const auth = require('./middleware/auth');
 
 require('dotenv').config();
 
@@ -81,6 +82,9 @@ app.use((req, res, next) => {
   // Request can now continue and can be handled by our routes
   next();
 });
+
+// Register authentication middleware, run every request that reaches graphql endpoint but it won't deny the request if there's no token
+app.use(auth);
 
 // GraphQL configuration.
 const graphqlConfig = {
