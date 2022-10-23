@@ -154,7 +154,7 @@ const createPost = async ({ postInput }, req) => {
 
     const userPostFormat = {
       ...createdPost._doc,
-      _id: createdPost._id.toString,
+      _id: createdPost._id.toString(),
       createdAt: createdPost.createdAt.toISOString(),
       updatedAt: createdPost.updatedAt.toISOString()
     };
