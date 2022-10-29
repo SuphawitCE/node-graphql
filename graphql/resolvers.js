@@ -170,7 +170,7 @@ const createPost = async ({ postInput }, req) => {
   }
 };
 
-const posts = async (args, req) => {
+const getPosts = async (args, req) => {
   //  Check if user not authenticated
   if (!req.isAuth) {
     const error = new Error('Not authenticated');
@@ -203,7 +203,7 @@ const resolver = {
   createUser,
   login,
   createPost,
-  posts
+  getPosts
 };
 
 module.exports = resolver;
