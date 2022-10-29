@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const Post = require('../models/post');
+const post = require('../models/post');
 
 const createUser = async ({ userInput }, req) => {
   console.log({ 'resolver-create-user': userInput });
@@ -169,10 +170,40 @@ const createPost = async ({ postInput }, req) => {
   }
 };
 
+const posts = async (args, req) => {
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
+  // Pagination logic
+  const getTotalPosts = await Post.find().countDocuments();
+
+  // Get sorted post
+  const getPosts = await Post.find()
+    .sort({ createdAt: -1 })
+    .populate('creator');
+
+  const responseData = {
+    posts: getPosts.map((post) => ({
+      ...post._doc,
+      _id: post._id.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString()
+    })),
+    totalPosts: getTotalPosts
+  };
+
+  return responseData;
+};
+
 const resolver = {
   createUser,
   login,
-  createPost
+  createPost,
+  posts
 };
 
 module.exports = resolver;
