@@ -152,6 +152,9 @@ const createPost = async ({ postInput }, req) => {
     //  Connect to add post with user
     getUser.posts.push(createdPost);
 
+    // Save users post
+    await getUser.save();
+
     const userPostFormat = {
       ...createdPost._doc,
       _id: createdPost._id.toString(),
