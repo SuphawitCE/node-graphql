@@ -26,6 +26,11 @@ const schemaAttributes = `
     userId: String!
   }
 
+  type PostData {
+    posts: [Post!]!
+    totalPosts: Int!
+  }
+
   input UserInputData {
     email: String!
     name: String!
@@ -40,6 +45,7 @@ const schemaAttributes = `
 
   type RootQuery {
     login(email: String!, password: String!): AuthData!
+    getPosts: PostData!
   }
 
   type RootMutation {
