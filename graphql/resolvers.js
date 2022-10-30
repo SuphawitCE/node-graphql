@@ -170,7 +170,7 @@ const createPost = async ({ postInput }, req) => {
   }
 };
 
-const getPosts = async (args, req) => {
+const getPosts = async ({ page }, req) => {
   //  Check if user not authenticated
   if (!req.isAuth) {
     const error = new Error('Not authenticated');
@@ -179,11 +179,21 @@ const getPosts = async (args, req) => {
   }
 
   // Pagination logic
+  if (!page) {
+    //  Set page default
+    page = 1;
+  }
+
+  // Display item limited at 2 items per page
+  const perPage = 3;
+
   const getTotalPosts = await Post.find().countDocuments();
 
   // Get sorted post
   const getPosts = await Post.find()
     .sort({ createdAt: -1 })
+    .skip((page - 1) * perPage)
+    .limit(perPage)
     .populate('creator');
 
   const responseData = {

@@ -45,7 +45,7 @@ const schemaAttributes = `
 
   type RootQuery {
     login(email: String!, password: String!): AuthData!
-    getPosts: PostData!
+    getPosts(page: Int!): PostData!
   }
 
   type RootMutation {
