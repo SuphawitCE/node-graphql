@@ -209,11 +209,39 @@ const getPosts = async ({ page }, req) => {
   return responseData;
 };
 
+const getPostById = async ({ id }, req) => {
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
+  //  Get a single post, Retrieve a single post
+  const getPost = await Post.findById(id).populate('creator');
+
+  if (!getPost) {
+    const error = new Error('No post found');
+    error.code = 404;
+    throw error;
+  }
+
+  const responseData = {
+    ...getPost._doc,
+    _id: getPost._id.toString(),
+    createdAt: getPost.createdAt.toISOString(),
+    updatedAt: getPost.updatedAt.toISOString()
+  };
+
+  return responseData;
+};
+
 const resolver = {
   createUser,
   login,
   createPost,
-  getPosts
+  getPosts,
+  getPostById
 };
 
 module.exports = resolver;
