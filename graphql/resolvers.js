@@ -236,12 +236,70 @@ const getPostById = async ({ id }, req) => {
   return responseData;
 };
 
+const updatePost = async ({ id, postInput }, req) => {
+  console.log({ 'update-post-response': postInput });
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
+  // Get post
+  const getPost = await Post.findById(id).populate('creator');
+
+  if (!getPost) {
+    const error = new Error('No post found');
+    error.code = 404;
+    throw error;
+  }
+
+  // Check user doesn't authorize
+  if (getPost.creator._id.toString() !== req.userId.toString()) {
+    const error = new Error('Not authorized');
+    error.code = 403;
+    throw error;
+  }
+
+  //  Validate input email
+  const errors = [];
+
+  if (errors.length > 0) {
+    const error = new Error('Invalid input.');
+    error.data = errors;
+    error.code = 422;
+    throw error;
+  }
+
+  // Updating post
+  getPost.title = postInput.title;
+  getPost.content = postInput.content;
+
+  if (postInput.imageUrl !== 'undefined') {
+    getPost.imageUrl = postInput.imageUrl;
+  }
+
+  // Save post
+  const updatedPost = await getPost.save();
+  // const updatedPost = await post.save();
+
+  const responseData = {
+    ...updatedPost._doc,
+    _id: updatedPost._id.toString(),
+    createdAt: updatedPost.createdAt.toISOString(),
+    updatedAt: updatedPost.updatedAt.toISOString()
+  };
+
+  return responseData;
+};
+
 const resolver = {
   createUser,
   login,
   createPost,
   getPosts,
-  getPostById
+  getPostById,
+  updatePost
 };
 
 module.exports = resolver;
