@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -111,6 +112,29 @@ const graphqlConfig = {
   }
 };
 
+app.use(auth);
+
+app.put('/post-image', (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error('Not authenticated');
+  }
+
+  if (!req.file) {
+    return res.status(200).json({ message: 'No file provided!' });
+  }
+
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+
+  const responseData = {
+    message: 'File stored',
+    filePath: req.file.path
+  };
+
+  return res.status(201).json(responseData);
+});
+
 // GraphQL register middleware.
 app.use('/graphql', graphqlHTTP(graphqlConfig));
 
@@ -132,3 +156,13 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+const clearImage = (filePath) => {
+  console.log({ 'clear-image': filePath });
+  filePath = path.join(__dirname, '..', filePath);
+
+  // Delete that file by passing a file path
+  fs.unlink(filePath, (error) => {
+    console.log({ 'delete-image-file-error': error });
+  });
+};
