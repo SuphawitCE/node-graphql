@@ -1,5 +1,4 @@
 const path = require('path');
-const fs = require('fs');
 
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -13,6 +12,7 @@ const { graphqlHTTP } = require('express-graphql');
 const graphqlScehma = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
+const { clearImage } = require('./utils/file');
 
 require('dotenv').config();
 
@@ -156,13 +156,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-const clearImage = (filePath) => {
-  console.log({ 'clear-image': filePath });
-  filePath = path.join(__dirname, '..', filePath);
-
-  // Delete that file by passing a file path
-  fs.unlink(filePath, (error) => {
-    console.log({ 'delete-image-file-error': error });
-  });
-};
