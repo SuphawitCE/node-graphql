@@ -45,7 +45,7 @@ const schemaAttributes = `
 
   type RootQuery {
     login(email: String!, password: String!): AuthData!
-    getPosts(page: Int!): PostData!
+    getPosts(page: Int): PostData!
     getPostById(id: ID!): Post!
     userStatus: User!
   }
