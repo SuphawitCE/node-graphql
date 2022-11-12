@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Post = require('../models/post');
 const post = require('../models/post');
+const { clearImage } = require('../utils/file');
 
 const createUser = async ({ userInput }, req) => {
   console.log({ 'resolver-create-user': userInput });
@@ -237,7 +238,7 @@ const getPostById = async ({ id }, req) => {
 };
 
 const updatePost = async ({ id, postInput }, req) => {
-  console.log({ 'update-post-response': postInput });
+  console.log({ 'update-post-request': postInput });
   //  Check if user not authenticated
   if (!req.isAuth) {
     const error = new Error('Not authenticated');
@@ -261,8 +262,21 @@ const updatePost = async ({ id, postInput }, req) => {
     throw error;
   }
 
-  //  Validate input email
+  //  Validate input
   const errors = [];
+  if (
+    validator.isEmpty(postInput.title) ||
+    !validator.isLength(postInput.title, { min: 5 })
+  ) {
+    errors.push({ message: 'Title is invalid' });
+  }
+
+  if (
+    validator.isEmpty(postInput.content) ||
+    !validator.isLength(postInput.content, { min: 5 })
+  ) {
+    errors.push({ message: 'Content is invalid' });
+  }
 
   if (errors.length > 0) {
     const error = new Error('Invalid input.');
@@ -281,7 +295,6 @@ const updatePost = async ({ id, postInput }, req) => {
 
   // Save post
   const updatedPost = await getPost.save();
-  // const updatedPost = await post.save();
 
   const responseData = {
     ...updatedPost._doc,
@@ -293,13 +306,68 @@ const updatePost = async ({ id, postInput }, req) => {
   return responseData;
 };
 
+const deletePost = async ({ id }, req) => {
+  try {
+    //  Check if user not authenticated
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+
+    // Get post ID
+    const getPost = await Post.findById(id);
+
+    // If post doesn't exist
+    if (!getPost) {
+      const error = new Error('No post found');
+      error.code = 404;
+      throw error;
+    }
+
+    if (getPost.creator.toString() !== req.userId.toString()) {
+      const error = new Error('Not authorized');
+      error.code = 403;
+      throw error;
+    }
+
+    // Delete image that belog to post
+    clearImage(getPost.imageUrl);
+
+    //  Remove post by id
+    await Post.findByIdAndRemove(id);
+
+    //  Validate user post has removed
+    const getUser = await User.findById(req.userId);
+
+    console.log('Pull the post: ', getUser.posts.pull(id));
+
+    //  Acces post that just deleted by id and Check if a post still exist, Delete post failure
+    if (getUser.posts.pull(id).length !== 0) {
+      return false;
+    }
+
+    // Save user data
+    await getUser.save();
+
+    //  Delete post successful
+    return true;
+  } catch (error) {
+    console.log({ 'delete-post-response': { id, userId: req.userId, error } });
+
+    // Delete post failure
+    return false;
+  }
+};
+
 const resolver = {
   createUser,
   login,
   createPost,
   getPosts,
   getPostById,
-  updatePost
+  updatePost,
+  deletePost
 };
 
 module.exports = resolver;
