@@ -360,6 +360,57 @@ const deletePost = async ({ id }, req) => {
   }
 };
 
+const userStatus = async (args, req) => {
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
+  const getUser = await User.findById(req.userId);
+  if (!getUser) {
+    const error = new Error('No user found');
+    error.code = 404;
+    throw error;
+  }
+
+  const responseData = {
+    ...getUser._doc,
+    _id: getUser._id.toString()
+  };
+
+  console.log('res: ', responseData);
+  return responseData;
+};
+
+const updateStatus = async ({ status }, req) => {
+  //  Check if user not authenticated
+  if (!req.isAuth) {
+    const error = new Error('Not authenticated');
+    error.code = 401;
+    throw error;
+  }
+
+  const getUser = await User.findById(req.userId);
+  if (!getUser) {
+    const error = new Error('No user found');
+    error.code = 404;
+    throw error;
+  }
+
+  // Update user status attribute to a new status
+  getUser.status = status;
+  await getUser.save();
+
+  const responseData = {
+    ...getUser._doc,
+    _id: getUser._id.toString()
+  };
+
+  return responseData;
+};
+
 const resolver = {
   createUser,
   login,
@@ -367,7 +418,9 @@ const resolver = {
   getPosts,
   getPostById,
   updatePost,
-  deletePost
+  deletePost,
+  userStatus,
+  updateStatus
 };
 
 module.exports = resolver;

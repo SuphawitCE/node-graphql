@@ -47,6 +47,7 @@ const schemaAttributes = `
     login(email: String!, password: String!): AuthData!
     getPosts(page: Int!): PostData!
     getPostById(id: ID!): Post!
+    userStatus: User!
   }
 
   type RootMutation {
@@ -54,6 +55,7 @@ const schemaAttributes = `
     createPost(postInput: PostInputData): Post!
     updatePost(id: ID!, postInput: PostInputData): Post!
     deletePost(id: ID!): Boolean
+    updateStatus(status: String!): User!
   }
 
   schema {
